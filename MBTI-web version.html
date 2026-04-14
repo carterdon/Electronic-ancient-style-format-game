@@ -1,0 +1,1017 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>SBTI 赛博人格测算仪 (终极版)</title>
+    <style>
+        :root {
+            --bg-dark: #0f111a;
+            --card-bg: rgba(30, 33, 43, 0.85);
+            --text-main: #e2e8f0;
+            --text-light: #94a3b8;
+            --primary: #818cf8; 
+            --primary-glow: rgba(129, 140, 248, 0.3);
+            --secondary: #2dd4bf; 
+            --accent-1: #f472b6; 
+            --accent-2: #fbbf24; 
+            --border-color: rgba(255, 255, 255, 0.08);
+            --border-radius: 24px;
+            --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+            background-image: radial-gradient(circle at top right, rgba(129, 140, 248, 0.05), transparent 40%),
+                              radial-gradient(circle at bottom left, rgba(45, 212, 191, 0.05), transparent 40%);
+        }
+
+        #app-container {
+            width: 100%;
+            max-width: 600px;
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+            box-shadow: 0 0 40px rgba(0,0,0,0.5);
+        }
+
+        .page {
+            display: none;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            min-height: 100%;
+            padding: 40px 25px;
+            flex-direction: column;
+            animation: fadeIn 0.4s forwards;
+            z-index: 1;
+        }
+        .page.active {
+            display: flex;
+            z-index: 10;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ----- 主页 ----- */
+        #home-page {
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+        .hero-img {
+            width: 110px;
+            height: 110px;
+            background: linear-gradient(135deg, #4f46e5, #0d9488);
+            border-radius: 35px;
+            margin-bottom: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 2.5rem;
+            font-weight: 900;
+            box-shadow: 0 10px 30px var(--primary-glow);
+            transform: rotate(-5deg);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .title {
+            font-size: 2.2rem;
+            font-weight: 800;
+            margin-bottom: 15px;
+            line-height: 1.3;
+            background: linear-gradient(to right, #a5b4fc, #5eead4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .desc {
+            font-size: 1rem;
+            color: var(--text-light);
+            line-height: 1.7;
+            margin-bottom: 40px;
+            padding: 0 10px;
+        }
+        .start-btn {
+            background: rgba(129, 140, 248, 0.1);
+            color: var(--primary);
+            border: 1px solid var(--primary);
+            padding: 16px 0;
+            width: 100%;
+            border-radius: 30px;
+            font-size: 1.15rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: var(--transition);
+            backdrop-filter: blur(10px);
+        }
+        .start-btn:hover, .start-btn:active {
+            background: var(--primary);
+            color: var(--bg-dark);
+            box-shadow: 0 0 20px var(--primary-glow);
+        }
+
+        /* ----- 测试页 ----- */
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        /* 返回按钮样式 */
+        .back-btn {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            color: var(--text-light);
+            padding: 5px 14px;
+            border-radius: 14px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .back-btn:hover {
+            color: var(--primary);
+            border-color: var(--primary);
+            background: rgba(129, 140, 248, 0.1);
+        }
+        .progress-text {
+            font-size: 0.9rem;
+            font-weight: bold;
+            color: var(--primary);
+        }
+        .progress-container {
+            width: 100%;
+            height: 6px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 3px;
+            margin-bottom: 30px;
+            overflow: hidden;
+        }
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+        .question {
+            font-size: 1.2rem;
+            font-weight: 600;
+            line-height: 1.5;
+            margin-bottom: 30px;
+            color: #f8fafc;
+        }
+        .option-btn {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            padding: 16px 20px;
+            margin-bottom: 12px;
+            border-radius: 16px;
+            font-size: 0.95rem;
+            text-align: left;
+            cursor: pointer;
+            transition: var(--transition);
+            line-height: 1.4;
+            display: flex;
+            align-items: center;
+            backdrop-filter: blur(10px);
+        }
+        .option-btn:hover, .option-btn:active {
+            border-color: var(--primary);
+            background: rgba(129, 140, 248, 0.08);
+            transform: scale(0.99);
+        }
+        .option-letter {
+            font-weight: 800;
+            color: var(--secondary);
+            margin-right: 15px;
+            font-size: 1.1rem;
+            min-width: 20px;
+        }
+
+        /* ----- 加载页 ----- */
+        #loading-page {
+            justify-content: center;
+            align-items: center;
+        }
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid rgba(129, 140, 248, 0.2);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s infinite linear;
+            margin-bottom: 25px;
+        }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+        .loading-msg {
+            font-size: 1.1rem;
+            color: var(--text-light);
+            text-align: center;
+            line-height: 1.6;
+        }
+
+        /* ----- 结果页 ----- */
+        #result-page {
+            padding: 30px 20px 80px 20px;
+            overflow-y: auto;
+        }
+        .result-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .type-code {
+            font-size: 3.5rem;
+            font-weight: 900;
+            color: transparent;
+            background: linear-gradient(135deg, #a5b4fc, #f472b6);
+            -webkit-background-clip: text;
+            letter-spacing: 2px;
+            margin-bottom: 5px;
+        }
+        .type-name {
+            font-size: 1.8rem;
+            font-weight: 800;
+            margin-bottom: 10px;
+            color: #f8fafc;
+        }
+        .type-subtitle {
+            font-size: 1rem;
+            color: var(--secondary);
+            margin-bottom: 20px;
+        }
+        .tag-list {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 25px;
+        }
+        .tag {
+            background: rgba(255,255,255,0.05);
+            color: var(--text-main);
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .dim-box {
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            padding: 25px 20px;
+            border: 1px solid var(--border-color);
+            margin-bottom: 25px;
+        }
+        .dim-section { margin-bottom: 18px; text-align: left; }
+        .dim-section:last-child { margin-bottom: 0; }
+        .dim-header {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85rem;
+            color: var(--text-light);
+            margin-bottom: 8px;
+        }
+        .dim-bar-bg {
+            width: 100%;
+            height: 10px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 5px;
+            display: flex;
+            overflow: hidden;
+        }
+        .dim-bar-fill {
+            height: 100%;
+            transition: width 1s ease-out;
+        }
+        .color-ie { background: var(--primary); }
+        .color-ps { background: var(--secondary); }
+        .color-la { background: var(--accent-1); }
+        .color-kw { background: var(--accent-2); }
+        
+        .analysis-module {
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            padding: 25px 20px;
+            border: 1px solid var(--border-color);
+            margin-bottom: 20px;
+            text-align: left;
+        }
+        .module-title {
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: #f8fafc;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .module-title span { font-size: 1.3rem; }
+        .module-content {
+            font-size: 0.95rem;
+            line-height: 1.7;
+            color: #cbd5e1;
+        }
+
+        .match-box {
+            display: flex;
+            gap: 15px;
+            margin-top: 15px;
+        }
+        .match-card {
+            flex: 1;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 16px;
+            padding: 15px;
+            text-align: center;
+        }
+        .match-label {
+            font-size: 0.8rem;
+            color: var(--text-light);
+            margin-bottom: 8px;
+        }
+        .match-type {
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: var(--secondary);
+        }
+        .match-card.bad .match-type {
+            color: var(--accent-1);
+        }
+
+        .action-btns {
+            display: flex;
+            justify-content: center;
+            margin-top: 40px;
+        }
+        .btn-solid {
+            background: rgba(129, 140, 248, 0.2);
+            border: 1px solid var(--primary);
+            color: var(--primary);
+            padding: 16px 40px;
+            border-radius: 30px;
+            font-weight: bold;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        .btn-solid:hover {
+            background: var(--primary);
+            color: var(--bg-dark);
+        }
+    </style>
+</head>
+<body>
+
+<div id="app-container">
+
+    <!-- 主页 -->
+    <div id="home-page" class="page active">
+        <div class="hero-img">SBTI</div>
+        <h1 class="title">SBTI 赛博人格<br>终极测算版</h1>
+        <p class="desc">对标MBTI架构的完整版互联网人格测试。24道沉浸式情境题，万字级专业解析，深挖你在赛博世界里的真实精神底色。</p>
+        <button class="start-btn" onclick="startQuiz()">进入全息扫描</button>
+        <!-- 修改了主页下方的提示语 -->
+        <p style="margin-top: 25px; font-size: 0.75rem; color: #64748b;">以上测试仅供娱乐，非科学测评，不准别打，嘿嘿</p>
+    </div>
+
+    <!-- 测试页 -->
+    <div id="quiz-page" class="page">
+        <div class="top-bar">
+            <!-- 返回上一题按钮 -->
+            <button id="back-btn" class="back-btn" onclick="goBack()">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                上一题
+            </button>
+            <span class="progress-text" id="q-counter">1 / 24</span>
+        </div>
+        <div class="progress-container">
+            <div id="progress-bar" class="progress-bar"></div>
+        </div>
+        <div id="question-text" class="question">读取中...</div>
+        <div id="options-container"></div>
+    </div>
+
+    <!-- 加载页 -->
+    <div id="loading-page" class="page">
+        <div class="spinner"></div>
+        <div class="loading-msg" id="loading-msg">正在请求豆包大模型...<br><span style="font-size: 0.85rem; color:#64748b;">(本次测算数据量较大，请稍候)</span></div>
+    </div>
+
+    <!-- 结果页 -->
+    <div id="result-page" class="page">
+        
+        <div class="result-header">
+            <div class="type-code" id="res-code">XXXX</div>
+            <div class="type-name" id="res-name">称号</div>
+            <div class="type-subtitle" id="res-subtitle">简介</div>
+            <div class="tag-list" id="res-tags"></div>
+        </div>
+        
+        <div class="dim-box">
+            <h3 style="font-size: 1rem; margin-bottom: 15px; text-align: center; color: #f8fafc;">精神状态成分解析</h3>
+            <div class="dim-section">
+                <div class="dim-header">
+                    <span>I 潜水 (<span id="perc-i">0%</span>)</span>
+                    <span>(<span id="perc-e">0%</span>) 显眼 E</span>
+                </div>
+                <div class="dim-bar-bg"><div class="dim-bar-fill color-ie" id="bar-ie"></div></div>
+            </div>
+            <div class="dim-section">
+                <div class="dim-header">
+                    <span>P 佛系 (<span id="perc-p">0%</span>)</span>
+                    <span>(<span id="perc-s">0%</span>) 出击 S</span>
+                </div>
+                <div class="dim-bar-bg"><div class="dim-bar-fill color-ps" id="bar-ps"></div></div>
+            </div>
+            <div class="dim-section">
+                <div class="dim-header">
+                    <span>L 严谨 (<span id="perc-l">0%</span>)</span>
+                    <span>(<span id="perc-a">0%</span>) 混沌 A</span>
+                </div>
+                <div class="dim-bar-bg"><div class="dim-bar-fill color-la" id="bar-la"></div></div>
+            </div>
+            <div class="dim-section">
+                <div class="dim-header">
+                    <span>K 仓鼠 (<span id="perc-k">0%</span>)</span>
+                    <span>(<span id="perc-w">0%</span>) 冲浪 W</span>
+                </div>
+                <div class="dim-bar-bg"><div class="dim-bar-fill color-kw" id="bar-kw"></div></div>
+            </div>
+        </div>
+
+        <div class="analysis-module">
+            <div class="module-title"><span>🧩</span> 赛博人设</div>
+            <div class="module-content" id="res-persona">加载中...</div>
+        </div>
+
+        <div class="analysis-module">
+            <div class="module-title"><span>💬</span> 社交偏好</div>
+            <div class="module-content" id="res-social">加载中...</div>
+        </div>
+
+        <div class="analysis-module">
+            <div class="module-title"><span>🌪️</span> 精神状态</div>
+            <div class="module-content" id="res-mental">加载中...</div>
+        </div>
+
+        <div class="analysis-module">
+            <div class="module-title"><span>💡</span> 生存指南</div>
+            <div class="module-content" id="res-guide">加载中...</div>
+        </div>
+
+        <div class="analysis-module">
+            <div class="module-title"><span>🔗</span> 赛博匹配</div>
+            <div class="module-content">
+                在浩瀚的网络海洋里，总有人与你灵魂共振，也总有人让你高血压。
+                <div class="match-box">
+                    <div class="match-card">
+                        <div class="match-label">天选赛博搭子</div>
+                        <div class="match-type" id="res-best">加载中</div>
+                    </div>
+                    <div class="match-card bad">
+                        <div class="match-label">天生相爱相杀</div>
+                        <div class="match-type" id="res-worst">加载中</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="action-btns">
+            <button class="btn-solid" onclick="location.reload()">再测一次</button>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    // 状态与分数记录
+    let scores = { I: 0, E: 0, P: 0, S: 0, L: 0, A: 0, K: 0, W: 0 };
+    let currentQ = 0;
+    let historyStack =[]; // 记录每一步的选择，用于“返回上一题”
+
+    // 24道题题库 
+    const questions =[
+        // 【I vs E】潜水 vs 显眼
+        {
+            text: "1. 发现一个逆天AI视频神器，你的第一反应是：",
+            options:[
+                { text: "默默捣鼓半天，存本地自己看。", type: 'I', val: 2 },
+                { text: "发给好友，私下一起乐。", type: 'I', val: 1 },
+                { text: "朋友圈发个截图：“这东西有点牛”。", type: 'E', val: 1 },
+                { text: "火速整活做个离谱视频，全网首发抢流量！", type: 'E', val: 2 }
+            ]
+        },
+        {
+            text: "2. 经常在网上散发“偷感”（潜水怕被熟人发现）？主要是因为：",
+            options:[
+                { text: "纯嫌麻烦。我的世界自己懂就好。", type: 'I', val: 2 },
+                { text: "间歇性“淡淡综合症”，懒得立人设。", type: 'I', val: 1 },
+                { text: "假装潜水，其实在憋个惊艳所有人的大招。", type: 'E', val: 1 },
+                { text: "偷感？不存在的。恨不得脑机接口24小时直播。", type: 'E', val: 2 }
+            ]
+        },
+        {
+            text: "3. 玩多人联机游戏或进入元宇宙社交房时，你的麦克风状态？",
+            options:[
+                { text: "绝对闭麦。能打字就不说话，打字也嫌累。", type: 'I', val: 2 },
+                { text: "看情况。大多时候闭麦，熟人才开。", type: 'I', val: 1 },
+                { text: "随性开麦，有人聊天就顺便搭几句话。", type: 'E', val: 1 },
+                { text: "全场指挥官/气氛组！一进去就全麦高呼。", type: 'E', val: 2 }
+            ]
+        },
+        {
+            text: "4. 群里突然天降惊天大瓜，你会：",
+            options:[
+                { text: "静静爬楼，吃完瓜内心毫无波澜。", type: 'I', val: 2 },
+                { text: "打字想附和，想想又删了，继续窥屏。", type: 'I', val: 1 },
+                { text: "甩个吃瓜表情包，坐等前排速更。", type: 'E', val: 1 },
+                { text: "连发十条语音+百字长文，火速接管群聊！", type: 'E', val: 2 }
+            ]
+        },
+        {
+            text: "5. 遇到特别开心的事（比如中奖、拿到offer），你的赛博报喜方式？",
+            options:[
+                { text: "谁也不说，自己晚上加个鸡腿暗爽。", type: 'I', val: 2 },
+                { text: "只发给一两个最铁的赛博搭子分享。", type: 'I', val: 1 },
+                { text: "发条朋友圈，等大家来点赞祝贺。", type: 'E', val: 1 },
+                { text: "朋友圈、微博、小红书九宫格全平台同步放送！", type: 'E', val: 2 }
+            ]
+        },
+        {
+            text: "6. 你的社交账号头像和签名，是个啥情况？",
+            options:[
+                { text: "万年不换，全灰白或风景，主打赛博隐身。", type: 'I', val: 2 },
+                { text: "偶尔随心情换个图，签名是极简符号。", type: 'I', val: 1 },
+                { text: "用最新热梗当头像，签名紧跟时事。", type: 'E', val: 1 },
+                { text: "高频换美照/整活图，就是我的个人名片！", type: 'E', val: 2 }
+            ]
+        },
+
+        // 【P vs S】佛系 vs 出击
+        {
+            text: "7. 刷到刻意制造焦虑或拉踩的引战短视频，你会：",
+            options:[
+                { text: "内心确诊卡皮巴拉，平静划走。", type: 'P', val: 2 },
+                { text: "皱皱眉，点个“不感兴趣”净化推荐流。", type: 'P', val: 1 },
+                { text: "去评论区留句“这什么鬼”，轻微吐槽。", type: 'S', val: 1 },
+                { text: "战斗欲当场拉满！写小作文狂喷并反手举报。", type: 'S', val: 2 }
+            ]
+        },
+        {
+            text: "8. 线上协作/打游戏，遇到疯狂划水还甩锅的队友：",
+            options:[
+                { text: "算了，我自己干。拒绝情绪内耗。", type: 'P', val: 2 },
+                { text: "叹口气接过来干，但以后绝对拉黑他。", type: 'P', val: 1 },
+                { text: "@他点名提醒，语气里带点不耐烦。", type: 'S', val: 1 },
+                { text: "截图留证，重拳出击！直接公开处刑。", type: 'S', val: 2 }
+            ]
+        },
+        {
+            text: "9. 看到评论区有人对你所在的圈子发表极度无知的言论？",
+            options:[
+                { text: "翻个大白眼直接滑走，跟傻子争论没意义。", type: 'P', val: 2 },
+                { text: "在心里默念三遍“没文化真可怕”。", type: 'P', val: 1 },
+                { text: "忍不住上去贴个资料，简单普法一下。", type: 'S', val: 1 },
+                { text: "键盘冒奶！一条条驳斥过去，不喷到他删评不罢休。", type: 'S', val: 2 }
+            ]
+        },
+        {
+            text: "10. 如果你在网上被人恶意拉踩或者挂了？",
+            options:[
+                { text: "当他是个笑话。退网几天，理他算我输。", type: 'P', val: 2 },
+                { text: "关掉私信和评论保平安，等热度过去。", type: 'P', val: 1 },
+                { text: "发一条动态简单澄清，然后交给大众评判。", type: 'S', val: 1 },
+                { text: "直接开专场！甩证据拉时间线，不搞赢绝不睡觉。", type: 'S', val: 2 }
+            ]
+        },
+        {
+            text: "11. 班味太重快碎了，你怎么给自己做赛博心理按摩？",
+            options:[
+                { text: "刷沉浸式风景/修驴蹄视频，自我催眠。", type: 'P', val: 2 },
+                { text: "听音乐或播客，默默消化负能量。", type: 'P', val: 1 }, 
+                { text: "朋友圈发条仅三天可见的吐槽，发泄一下。", type: 'S', val: 1 },
+                { text: "使用小号在评论区疯狂开麦痛骂！绝不内耗自己。", type: 'S', val: 2 } 
+            ]
+        },
+        {
+            text: "12. 面对网络上铺天盖地的“烂梗”，你的态度是？",
+            options:[
+                { text: "无感。互联网就是一阵风，吹过就散了。", type: 'P', val: 2 },
+                { text: "不太喜欢，但大家都在玩，我也就看看。", type: 'P', val: 1 },
+                { text: "看到觉得不适的烂梗，会点踩或屏蔽。", type: 'S', val: 1 },
+                { text: "极度反感并在群里公然批判这种“赛博垃圾”。", type: 'S', val: 2 }
+            ]
+        },
+
+        // 【L vs A】严谨 vs 混沌
+        {
+            text: "13. 半夜，朋友突然发来一段极其抽象的发疯文学：",
+            options:[
+                { text: "丢给大模型，让它提炼重点并生成理性建议。", type: 'L', val: 2 },
+                { text: "认真安慰，并努力帮他梳理前因后果。", type: 'L', val: 1 },
+                { text: "没看懂，先刷屏“哈哈哈哈哈”烘托气氛。", type: 'A', val: 1 },
+                { text: "比他更疯！甩出最野的梗图，跨服灵魂共鸣。", type: 'A', val: 2 }
+            ]
+        },
+        {
+            text: "14. 和朋友聊天，你使用表情包的频率和风格？",
+            options:[
+                { text: "极少用。主要靠文字精准表达意思。", type: 'L', val: 2 },
+                { text: "偶尔用。基本都是基础款的可爱/礼貌表情。", type: 'L', val: 1 },
+                { text: "重度依赖。有事没事发几张沙雕图活跃气氛。", type: 'A', val: 1 },
+                { text: "全是电子包浆的高糊抽象图。能发图绝不打字。", type: 'A', val: 2 }
+            ]
+        },
+        {
+            text: "15. 刷科普视频，发现博主讲错了一个小常识：",
+            options:[
+                { text: "查一手资料，带上引用链接在评论区认真纠正。", type: 'L', val: 2 },
+                { text: "弹幕发个正确的，感叹现在做视频真不严谨。", type: 'L', val: 1 },
+                { text: "错就错吧。不如去看看博主的搞笑口误。", type: 'A', val: 1 },
+                { text: "发一句毫不相干的抽象神评，喜提热评一楼。", type: 'A', val: 2 }
+            ]
+        },
+        {
+            text: "16. 怎么评价最近爆火的各种毫无逻辑的“废话文学”？",
+            options:[
+                { text: "无聊透顶。降低了全人类的信息沟通效率。", type: 'L', val: 2 },
+                { text: "能理解这是种宣泄，但看着确实有点费脑子。", type: 'L', val: 1 },
+                { text: "还挺好玩的，看着不用动脑筋，挺解压。", type: 'A', val: 1 },
+                { text: "太对味了！简直是为我量身定制的赛博母语。", type: 'A', val: 2 }
+            ]
+        },
+        {
+            text: "17. 现在大家都在用AI工具，你的使用姿势是：",
+            options:[
+                { text: "写几百字的提示词，榨干AI生产力。", type: 'L', val: 2 }, 
+                { text: "当成高级百科用。有条理地问，快速找答案。", type: 'L', val: 1 },
+                { text: "经常让AI角色扮演（比如虚拟男/女友），纯当陪聊。", type: 'A', val: 1 }, 
+                { text: "故意发神经指令看AI崩溃，并截图发群里取乐。", type: 'A', val: 2 }
+            ]
+        },
+        {
+            text: "18. 被逼着写年终总结或公开小作文，你会：",
+            options:[
+                { text: "列出提纲、数据支撑，排版严丝合缝。", type: 'L', val: 2 },
+                { text: "自己认真写，字斟句酌，反复查错别字。", type: 'L', val: 1 },
+                { text: "强行缝合一堆网络烂梗。逻辑不重要好玩就行。", type: 'A', val: 1 },
+                { text: "打乱语序，满篇意识流，主打一个发疯美学。", type: 'A', val: 2 }
+            ]
+        },
+
+        // 【K vs W】仓鼠 vs 冲浪
+        {
+            text: "19. 刷到一个两小时、干货爆满的“保姆级教程”：",
+            options:[
+                { text: "火速存进收藏夹。学没学不管，仪式感要有。", type: 'K', val: 2 },
+                { text: "点赞+投币。假装自己已经看完了。", type: 'K', val: 1 },
+                { text: "拖进度条随便看看。心里想：有没有精简版？", type: 'W', val: 1 },
+                { text: "去评论区找课代表总结，看完就去下一个瓜田。", type: 'W', val: 2 }
+            ]
+        },
+        {
+            text: "20. 睡前躺平的最后半小时，你通常在干嘛？",
+            options:[
+                { text: "整理白天随手存的备忘录、书签和截图。", type: 'K', val: 2 },
+                { text: "安安静静看几篇深度文章或小说，酝酿睡意。", type: 'K', val: 1 },
+                { text: "没脑子地刷短视频信息流。算法推啥看啥。", type: 'W', val: 1 },
+                { text: "像个雷达一样在各大吃瓜群和热搜榜来回穿梭。", type: 'W', val: 2 }
+            ]
+        },
+        {
+            text: "21. 关注列表里有几百个博主，你平时怎么看？",
+            options:[
+                { text: "必须分组整理得明明白白（数码、搞笑、学习）。", type: 'K', val: 2 },
+                { text: "大致分个类，有目的性地去翻特定博主的更新。", type: 'K', val: 1 },
+                { text: "从来不分组。刷到谁看谁，全凭缘分。", type: 'W', val: 1 },
+                { text: "懒得看关注流。直接去“推荐/热榜”看全网爆款。", type: 'W', val: 2 }
+            ]
+        },
+        {
+            text: "22. 手机空间爆满，被逼着清理内存时：",
+            options:[
+                { text: "没看的电子书、过期的梗图都是宝贝，绝不删！", type: 'K', val: 2 },
+                { text: "纠结半天，只删垃圾文件。资料必须留着。", type: 'K', val: 1 },
+                { text: "随便清点缓存凑合用。真不行删几个APP。", type: 'W', val: 1 },
+                { text: "昨天的截图就是明天的垃圾。相册一键清空。", type: 'W', val: 2 }
+            ]
+        },
+        {
+            text: "23. 遇到一款爆火但需要花时间学的新游戏/新平台？",
+            options:[
+                { text: "先去B站看三篇万字攻略，做足功课再下载。", type: 'K', val: 2 },
+                { text: "找个懂行的朋友带，或者存几个新手指南。", type: 'K', val: 1 },
+                { text: "先下再说，一边瞎点一边摸索，死了重开。", type: 'W', val: 1 },
+                { text: "自己懒得下，直接去看主播玩，云通关最爽。", type: 'W', val: 2 }
+            ]
+        },
+        {
+            text: "24. 某国民APP上线了一个特别复杂的新功能：",
+            options:[
+                { text: "第一时间存三份图文解析，留着周末慢慢盘。", type: 'K', val: 2 },
+                { text: "关注测评博主，等他们嚼碎了喂给我。", type: 'K', val: 1 },
+                { text: "原理是啥？不管，自己瞎点瞎玩就对了。", type: 'W', val: 1 },
+                { text: "功能不重要。主要看大家怎么吐槽它出了啥新梗。", type: 'W', val: 2 }
+            ]
+        }
+    ];
+
+    const resultsData = {
+        "IPLK": { 
+            name: "云端扫地僧", subtitle: "内核极度稳定的赛博图书馆长", tags:["淡淡综合症", "干货吃灰", "靠谱青年"],
+            persona: "你是互联网上极其稀缺的隐形大佬。你不爱发声，不跟风站队，但你的收藏夹和硬盘容量比谁都惊人。你把互联网当成一座巨大的图书馆，热衷于将优质信息搬运回自己的小窝。虽然那些《3天速成XXX》最后都在吃灰，但这种‘拥有’的踏实感是你最大的慰藉。",
+            social: "极简社交主义者。你极其讨厌无效群聊，微信长年开启免打扰。你不发朋友圈，也不爱点赞，但如果朋友真遇到难题，你总能像哆啦A梦一样甩出最实用的链接和干货。",
+            mental: "极其稳定，俗称‘淡淡综合症’。外界吵翻天，你内心依然毫无波澜。比起无意义的情绪宣泄，你更在乎一件事底层的逻辑规律。",
+            guide: "多清理一下吃灰的收藏夹，给赛博大脑减负；偶尔在群里冒个泡，大家其实很想听你这个‘局外人’的清醒洞察。",
+            bestMatch: "EPAW (气氛组组长) - 一静一动，完美互补", worstMatch: "ESAW (节奏魔术师) - 嫌他太吵，他嫌你闷"
+        },
+        "IPAK": { 
+            name: "赛博卡皮巴拉", subtitle: "情绪零内耗的脑洞收藏家", tags:["随遇而安", "脑洞清奇", "绝不内耗"],
+            persona: "全网最强卡皮巴拉本拉。网上的血雨腥风你根本不在乎，你像一株安静的电子盆栽，默默收集着世界的可爱与荒诞。你脑洞极大，但不爱跟人争辩，主打一个‘你要吵就是你对’。你的存在，给充满戾气的赛博空间提供了一片柔软的自留地。",
+            social: "被动型社牛。你不主动找人聊天，但谁找你聊你都能接住，而且回复的内容总是清奇且好笑。你几乎不生气，是朋友眼里最好的树洞。",
+            mental: "松弛感拉满。面对焦虑和内卷，你的防御机制是直接‘摆烂’并从中发现乐子。你有着常人难以企及的精神自愈能力。",
+            guide: "你的包容是天赋，但也别让某些越界的人消耗你的善意。遇到真让你不开心的事，偶尔发个小疯也是可以的。",
+            bestMatch: "ESLK (硬核引路人) - 他护着你，你治愈他", worstMatch: "ISLK (逻辑校对员) - 你的随性会逼疯他的强迫症"
+        },
+        "ISLK": { 
+            name: "逻辑校对员", subtitle: "暗中盯梢的赛博秩序守护者", tags:["强迫症晚期", "细节控", "理智吃瓜"],
+            persona: "互联网判官的编外人员。你平时不吭声，宛如透明人。但只要看到哪个大V胡说八道或者错字连篇，你的DNA就动了。你吃瓜都要把时间线盘得明明白白。你不爱带节奏，不盲从权威，你信仰的只有事实、证据和严谨的逻辑闭环。",
+            social: "有着极其严格的社交边界感。跟你聊天不能有太多废话和语病。你很少夸人，如果夸了，那绝对是经过了极其严密的论证。",
+            mental: "高压锅状态。你对这届网友的智商经常感到捉急，看到毫无逻辑的脑残发言会引发你的生理性不适。看似冷漠，其实内心充满对真理的执着。",
+            guide: "水至清则无鱼，赛博世界本就是一团混沌。试着放下对完美的执念，偶尔容忍一下别人的‘愚蠢’，你会轻松很多。",
+            bestMatch: "EPAK (灵感永动机) - 截然不同，互相吸引", worstMatch: "ISAK (高维观察者) - 两个冷面判官容易互相阴阳"
+        },
+        "ISAK": { 
+            name: "高维观察者", subtitle: "一眼看穿本质的幽默大师", tags:["人间清醒", "毒舌", "乐子人"],
+            persona: "你的毒舌堪比高级脱口秀演员。你平时懒得理人，一旦开口绝对是王炸。你拥有一种不被世俗洗脑的高维视角，总能用一句阴阳怪气的话戳破别人吹的牛。你不是在抬杠，你只是太清醒了而已。你手机里存着一堆可以当呈堂证供的黑历史图。",
+            social: "傲娇且护短。朋友惹麻烦了找你，你能一边骂他是个大怨种，一边精准地帮他把问题解决掉。不熟的人会觉得你难以接近，熟人才知道你有多靠谱。",
+            mental: "清醒的悲观主义者。因为看得太透，所以懒得拯救世界，只能用冷笑话和抽象烂梗来消解内心的虚无感。",
+            guide: "你的刀子嘴虽然精准，但偶尔也会误伤友军。试着把你的洞察力转化为更温和的表达，你会收获意想不到的追随者。",
+            bestMatch: "EPLW (赛博交际花) - 他懂你的冷幽默", worstMatch: "EPLK (赛博小太阳) - 你的毒舌会刺伤他的热情"
+        },
+        "IPLW": { 
+            name: "全景吃瓜群众", subtitle: "见证历史的无痕游览者", tags:["主打陪伴", "无痕冲浪", "人间观察员"],
+            persona: "你大概就是那种在游戏里路过都不掉血的NPC。哪里有瓜哪里有你，但你纯属看戏，绝不下场站队。你像是在云端俯瞰整个赛博大陆，吃瓜极其客观。不留痕迹是你冲浪的最高准则，你见证了无数互联网的腥风血雨，然后拍拍屁股去吃宵夜。",
+            social: "顶级倾听者。你从不评价别人的生活方式，在群里大多发发表情包烘托气氛。你是一个不会给任何人带来压力的存在。",
+            mental: "极其通透。看别人吵架就像在看猴戏，大家都在emo的时候，你只会觉得：哇，今天这网线没白连。外界的焦虑很难穿透你的防御。",
+            guide: "一直当观众确实很安全，但偶尔也要自己上台演一演。去尝试输出一点属于你的观点吧，其实很多人在期待你的声音。",
+            bestMatch: "ESAW (节奏魔术师) - 他负责演，你负责看", worstMatch: "ISLW (硬核溯源家) - 他嫌你太中立没有立场"
+        },
+        "IPAW": { 
+            name: "暗中偷感大师", subtitle: "深夜憋笑出内伤的搞笑女/男", tags:["偷感很重", "乐子人", "精神状态领先"],
+            persona: "你是个重度的‘偷感’患者。白天当个正常人，半夜看着烂梗图笑得像个水壶。你不会去评论区跟人对线，只会把离谱的帖子默默转给好基友。你的网络世界纯粹就是为了找乐子，不用立人设的你，活得比谁都洒脱和真实。",
+            social: "圈层极度隔离。现实中你可能社恐，但在只有两三人的私密群里，你是个超级话痨兼抽象大师。你只向极少数懂你的人展露真实的灵魂。",
+            mental: "自娱自乐的天才。你的精神状态遥遥领先，不开心了就去看点降智视频，你的多巴胺完全由你自己掌控。",
+            guide: "不用觉得‘偷感’是一件坏事，这是你在喧嚣时代保护自己的方式。继续保持你的快乐节奏，你是朋友们最珍贵的宝藏。",
+            bestMatch: "ESLW (前排护旗手) - 霸道总裁爱上搞笑小透明", worstMatch: "IPLK (云端扫地僧) - 你们聊不到一个频道上"
+        },
+        "ISLW": { 
+            name: "硬核溯源家", subtitle: "带着显微镜冲浪的福尔摩斯", tags:["拿证据说话", "果断出击", "拒绝被带节奏"],
+            persona: "别人吃瓜只看热闹，你吃瓜要查族谱。作为不信谣不传谣的骨干分子，看见造谣的营销号，你反手举报的速度比谁都快。你冲浪不仅是为了娱乐，更是为了求真。你不怕得罪人，讲究证据，谁要是跟你杠逻辑，那真是踢到钢板了。",
+            social: "直球选手。讨厌绕弯子和绿茶发言。如果朋友被欺负了，你会立刻帮他理清时间线，并制定详尽的反击计划。",
+            mental: "嫉恶如仇。容不得半点虚假，对互联网上的蠢和坏有着极低的容忍度。有时候容易因为别人的错误而惩罚自己（比如气得睡不着）。",
+            guide: "追求真相是可贵的，但互联网很多时候只是一场情绪的狂欢。学会抓大放小，保护好自己的乳腺和血压。",
+            bestMatch: "EPAK (灵感永动机) - 欢喜冤家", worstMatch: "IPLW (全景吃瓜群众) - 你受不了他看戏的态度"
+        },
+        "ISAW": { 
+            name: "赛博游侠", subtitle: "扔完炸弹就跑的节奏带师", tags:["开口即高光", "反应极快", "脑回路清奇"],
+            persona: "你是那种在群里扔个炸弹就跑的赛博游侠。平时不显山露水，遇到不爽的破事，一个极其抽象的表情包就能把对方怼得哑口无言。你冲浪主打一个潇洒，绝不陷入持久战。你的脑回路很野，往往能一眼看穿事情最搞笑、最荒诞的本质。",
+            social: "神出鬼没。不强求秒回，你想回就回。讨厌被社交关系绑架。但在大家聊得最嗨的时候，你总能精准补刀，贡献全场最佳笑点。",
+            mental: "极致的随性。你不在乎输赢，只在乎过程好不好玩。你的精神状态就像一阵风，谁也抓不住，谁也别想PUA你。",
+            guide: "你的潇洒令人羡慕。不过如果遇到真正值得深交的赛博搭子，偶尔稍微停留一下，也许会有不一样的风景。",
+            bestMatch: "EPLK (赛博小太阳) - 他能融化你的高冷", worstMatch: "ESLK (硬核引路人) - 他非要跟你论个对错"
+        },
+        "EPLK": { 
+            name: "赛博小太阳", subtitle: "互联网居委会热心大妈", tags:["热心肠", "能量补给站", "端水大师"],
+            persona: "你就是长辈眼里的好孩子，朋友眼里的居委会大妈。超级热心，四处点赞，看到个防脱发小妙招都要发给五个群。你不怕冷场，脾气好得让人心疼。在这个经常充满戾气、大家都戴着面具的赛博世界里，你真就是一股没有任何防备的暖流。",
+            social: "社交牛逼症初级阶段。你几乎认识所有圈子的人，在任何群里都能聊上几句。你是朋友聚会的攒局者，没有你大家都散了。",
+            mental: "充满阳光，但也容易讨好型人格发作。你太在乎别人的感受，有时候哪怕自己委屈，也要把气氛烘托好。",
+            guide: "你的善良很珍贵，但请记住：你不需要对所有人的情绪负责。学会在网络上偶尔‘自私’一点，你的快乐会更纯粹。",
+            bestMatch: "ISAW (赛博游侠) - 你们是天作之合", worstMatch: "ISAK (高维观察者) - 容易被他的阴阳怪气伤到"
+        },
+        "EPAK": { 
+            name: "灵感永动机", subtitle: "脑洞无限大的快乐修狗", tags:["没心没肺", "热情分享", "随心所欲"],
+            persona: "你就像一只刚被放出门的哈士奇。精力旺盛，思维跳跃，啥都想掺和一脚。你的脑洞大到离谱，别人根本猜不到你下一秒会发什么神经。虽然有时候做事三分钟热度，收藏的教程从来不看，但大家都喜欢你的没心没肺，跟你聊天永远不会无聊。",
+            social: "热情且主动。你经常疯狂艾特朋友看各种好玩的视频。即使别人没及时回你，你自己也能叭叭叭发几十条语音。",
+            mental: "极其活跃，但也容易注意力涣散。你的世界充满了新鲜事物，几乎没有时间留给悲伤和内耗。",
+            guide: "保持你的奇思妙想！但如果能试着把那些天马行空的脑洞，哪怕挑一个真正落地执行一下，你会发现自己其实是个天才。",
+            bestMatch: "ISLK (逻辑校对员) - 互补到了极点", worstMatch: "ISLW (硬核溯源家) - 他会不停纠正你的随性"
+        },
+        "ESLK": { 
+            name: "硬核引路人", subtitle: "绝不认输的赛博辩护律师", tags:["理据服人", "战斗力爆表", "护犊子"],
+            persona: "你天生就是打辩论赛的料。遇到观点不合的，你绝不妥协，非得去查资料找文献，把对方驳得心服口服才算完。你其实不是为了赢，你就是受不了别人侮辱你的智商。你虽然有点强势，但在大是大非面前，你绝对是最靠谱、最能扛事的那个意见领袖。",
+            social: "帮理也帮亲。如果你的朋友被欺负了，你会化身战神，把对方喷到退网。大家对你是又敬又畏。",
+            mental: "斗士精神。你靠解决问题和战胜谬误来获取成就感。永远充满干劲，但也容易因为过于紧绷而感到心累。",
+            guide: "互联网不是法庭，很多时候并没有绝对的对错。适当放下战斗姿态，你会发现有些看似愚蠢的事情其实也有它存在的意义。",
+            bestMatch: "IPAK (赛博卡皮巴拉) - 你的港湾", worstMatch: "ISAW (赛博游侠) - 秀才遇上兵，有理说不清"
+        },
+        "ESAK": { 
+            name: "混沌研究员", subtitle: "在天才和疯子间横跳的神仙", tags:["知识型抽象", "精分现场", "人格魅力"],
+            persona: "你就是那种让别人直呼‘精神状态遥遥领先’的神仙。上一秒能在朋友圈写几千字的高深度长文分析行业趋势，下一秒就能在评论区发最降智的疯言疯语。你知识面极广，但丝毫不耽误你抽象。大家看着你，就觉得像在看一部赛博科幻悬疑喜剧。",
+            social: "充满魅力的狂人。你身边总会围绕着一群崇拜你或觉得你很有趣的人。你不按套路出牌的聊天方式，是最高级的社交筹码。",
+            mental: "薛定谔的理智。你用疯狂来掩饰内心的极度理性。你之所以抽象，是因为你看穿了这个世界的荒诞规则。",
+            guide: "你是天生的KOL（意见领袖）。只要控制好发疯的边界，别让过度抽象反噬了你的专业性，你能在网络世界呼风唤雨。",
+            bestMatch: "IPLW (全景吃瓜群众) - 他是你最忠实的观众", worstMatch: "ISLK (逻辑校对员) - 他看不惯你的疯癫"
+        },
+        "EPLW": { 
+            name: "赛博交际花", subtitle: "谁都认识的顶级社交达人", tags:["四海皆兄弟", "高情商", "气氛组"],
+            persona: "全网社交天花板。谁的评论区你都能去唠两句，谁的梗你都能接住。情商高得吓人，不管什么圈子你都能混到前排刷脸。你不轻易得罪人，总能把气氛烘托得刚刚好，遇到争议也能完美端水。你是各个社群和圈子里离不开的万能粘合剂。",
+            social: "左右逢源。你的好友列表可能已经加满了，每天有回不完的消息。你深谙人性，知道对什么人该说什么话。",
+            mental: "外热内冷。表面上和谁都好，但真正能走进你心里的人极少。你偶尔会因为无效社交感到空虚。",
+            guide: "你在照顾所有人情绪的同时，别忘了照顾自己。偶尔拒绝一次别人的群聊邀请，给自己留一个独处的赛博周末吧。",
+            bestMatch: "ISAK (高维观察者) - 你们是天造地设的一对", worstMatch: "ISLW (硬核溯源家) - 你的端水会被他视为虚伪"
+        },
+        "EPAW": { 
+            name: "气氛组组长", subtitle: "全职显眼包兼快乐播种机", tags:["网速贼快", "毫无包袱", "快乐源泉"],
+            persona: "如果你有职业，那一定是‘全职显眼包’。你网速贼快，哪里出了新梗你绝对是第一批用的。大家看你的动态就像看段子大全。你不怕自嘲，只要能逗乐自己和大家，面子算个啥？有你在的地方，绝对冷不了场，你是天生的互联网快乐播种机。",
+            social: "人来疯。越热闹的地方你越嗨，完全没有社交恐惧症。你擅长把陌生人瞬间变成一起吃瓜的异父异母亲兄弟。",
+            mental: "纯粹的快乐主义者。你的神经极大条，即使遇到喷子，你也能用一个沙雕表情包化解，绝不往心里去。",
+            guide: "继续做你的快乐源泉吧！这个世界太需要你这样没有包袱的人了。不过吃瓜的时候注意安全，别一不小心冲到了雷区。",
+            bestMatch: "IPLK (云端扫地僧) - 动静结合", worstMatch: "ISLK (逻辑校对员) - 他会嫌你太吵太没正形"
+        },
+        "ESLW": { 
+            name: "前排护旗手", subtitle: "一生要强的扛把子", tags:["带头冲锋", "绝不妥协", "气场两米八"],
+            persona: "你就是那种天生要强、随时准备吹冲锋号的大佬。遇到热点事件，你绝对是冲在第一线扛大旗的人。你爱憎分明，性子直，看到不公的事情一定要大声喊出来。你气场两米八，极其护犊子，很多人其实都在暗暗跟随着你的节奏和号召。",
+            social: "大哥/大姐大做派。在群里具有绝对的话语权，大家遇到拿不准的事情都喜欢听你的意见。雷厉风行，不服就干。",
+            mental: "永不言弃的战士。你的内驱动力极强，遇到阻力反而更兴奋。但长时间处于战斗状态，容易让你产生暴躁情绪。",
+            guide: "你的领导力毋庸置疑。但记得在冲锋陷阵的时候，偶尔回头看看，让节奏慢一点，给身边的人一点喘息的空间。",
+            bestMatch: "IPAW (暗中偷感大师) - 你罩着他，他逗你笑", worstMatch: "ISAW (赛博游侠) - 你们谁也不服谁"
+        },
+        "ESAW": { 
+            name: "节奏魔术师", subtitle: "掌控互联网雷电的带师", tags:["呼风唤雨", "整活达人", "降维打击"],
+            persona: "评论区的王。你对网络情绪的嗅觉极其敏锐，特别知道大家爱看什么、怕什么。你发个帖子能瞬间引爆好几个群的讨论。你玩梗信手拈来，节奏带得飞起。不过你也是清醒的，所有看似狂热的发声，不过是你掌控互联网的一场大型社会学游戏。",
+            social: "控场大师。你清楚地知道如何引导话题走向，能轻而易举地化解危机，或者制造一场完美的赛博风暴。",
+            mental: "绝对自信，甚至有点自负。你享受掌控全局的快感，内心深处有一种‘众人皆醉我独醒’的傲骨。",
+            guide: "你的影响力巨大，这是一把双刃剑。在使用你的‘魔法’带节奏时，请务必坚守底线，让你的才华去推动更好的事情发生。",
+            bestMatch: "IPLW (全景吃瓜群众) - 最好的观众", worstMatch: "IPLK (云端扫地僧) - 水火不容"
+        }
+    };
+
+    const letters =['A', 'B', 'C', 'D'];
+
+    function showPage(id) {
+        document.querySelectorAll('.page').forEach(el => el.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+    }
+
+    function startQuiz() {
+        showPage('quiz-page');
+        renderQuestion();
+    }
+
+    function renderQuestion() {
+        const q = questions[currentQ];
+        document.getElementById('q-counter').innerText = (currentQ + 1) + " / " + questions.length;
+        document.getElementById('question-text').innerText = q.text;
+        
+        // 控制返回按钮的显示与隐藏 
+        const backBtn = document.getElementById('back-btn');
+        if (currentQ === 0) {
+            backBtn.style.visibility = 'hidden';
+        } else {
+            backBtn.style.visibility = 'visible';
+        }
+
+        const optsContainer = document.getElementById('options-container');
+        optsContainer.innerHTML = '';
+        
+        q.options.forEach((opt, index) => {
+            const btn = document.createElement('div');
+            btn.className = 'option-btn';
+            btn.innerHTML = `<span class="option-letter">${letters[index]}</span><span>${opt.text}</span>`;
+            btn.onclick = () => handleSelect(opt.type, opt.val);
+            optsContainer.appendChild(btn);
+        });
+
+        const progress = (currentQ / questions.length) * 100;
+        document.getElementById('progress-bar').style.width = progress + '%';
+    }
+
+    // 选中选项逻辑
+    function handleSelect(type, val) {
+        historyStack.push({ type: type, val: val }); 
+        scores[type] += val; 
+        currentQ++;
+
+        if (currentQ < questions.length) {
+            renderQuestion();
+        } else {
+            document.getElementById('progress-bar').style.width = '100%';
+            calculateResult();
+        }
+    }
+
+    // 返回上一题逻辑
+    function goBack() {
+        if (currentQ > 0) {
+            const lastChoice = historyStack.pop(); 
+            scores[lastChoice.type] -= lastChoice.val; 
+            currentQ--; 
+            renderQuestion(); 
+        }
+    }
+
+    function calculateResult() {
+        showPage('loading-page');
+
+        const msgs =[
+            "连线豆包大模型核心节点...", 
+            "翻找你的赛博垃圾桶...", 
+            "正在扫描你的潜水时长...", 
+            "分析你半夜发的那些疯...", 
+            "提取灵魂特质...", 
+            "正在生成终极确诊报告..."
+        ];
+        let mIdx = 0;
+        let t = setInterval(() => {
+            mIdx++;
+            if(mIdx < msgs.length) document.getElementById('loading-msg').innerHTML = msgs[mIdx] + '<br><span style="font-size: 0.85rem; color:#64748b;">(本次测算数据量较大，请稍候)</span>';
+        }, 600);
+
+        const typeI_E = scores.I >= scores.E ? 'I' : 'E';
+        const typeP_S = scores.P >= scores.S ? 'P' : 'S';
+        const typeL_A = scores.L >= scores.A ? 'L' : 'A';
+        const typeK_W = scores.K >= scores.W ? 'K' : 'W';
+        const finalCode = typeI_E + typeP_S + typeL_A + typeK_W;
+
+        const getPerc = (v1, v2) => {
+            let total = v1 + v2;
+            if(total === 0) return[50, 50];
+            return[Math.round((v1/total)*100), Math.round((v2/total)*100)];
+        };
+
+        const [pI, pE] = getPerc(scores.I, scores.E);
+        const [pP, pS] = getPerc(scores.P, scores.S);
+        const[pL, pA] = getPerc(scores.L, scores.A);
+        const[pK, pW] = getPerc(scores.K, scores.W);
+
+        setTimeout(() => {
+            clearInterval(t);
+            renderResult(finalCode, {pI, pE, pP, pS, pL, pA, pK, pW});
+        }, 3600);
+    }
+
+    function renderResult(code, perc) {
+        const res = resultsData[code];
+
+        document.getElementById('res-code').innerText = code;
+        document.getElementById('res-name').innerText = res.name;
+        document.getElementById('res-subtitle').innerText = res.subtitle;
+        
+        const tagsBox = document.getElementById('res-tags');
+        tagsBox.innerHTML = '';
+        res.tags.forEach(t => {
+            tagsBox.innerHTML += `<span class="tag"># ${t}</span>`;
+        });
+
+        document.getElementById('perc-i').innerText = perc.pI + '%';
+        document.getElementById('perc-e').innerText = perc.pE + '%';
+        document.getElementById('bar-ie').style.width = perc.pI + '%';
+
+        document.getElementById('perc-p').innerText = perc.pP + '%';
+        document.getElementById('perc-s').innerText = perc.pS + '%';
+        document.getElementById('bar-ps').style.width = perc.pP + '%';
+
+        document.getElementById('perc-l').innerText = perc.pL + '%';
+        document.getElementById('perc-a').innerText = perc.pA + '%';
+        document.getElementById('bar-la').style.width = perc.pL + '%';
+
+        document.getElementById('perc-k').innerText = perc.pK + '%';
+        document.getElementById('perc-w').innerText = perc.pW + '%';
+        document.getElementById('bar-kw').style.width = perc.pK + '%';
+
+        document.getElementById('res-persona').innerText = res.persona;
+        document.getElementById('res-social').innerText = res.social;
+        document.getElementById('res-mental').innerText = res.mental;
+        document.getElementById('res-guide').innerText = res.guide;
+        
+        document.getElementById('res-best').innerText = res.bestMatch;
+        document.getElementById('res-worst').innerText = res.worstMatch;
+
+        showPage('result-page');
+        window.scrollTo(0, 0); 
+    }
+</script>
+
+</body>
+</html>
